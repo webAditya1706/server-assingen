@@ -1,6 +1,8 @@
 const ragisterUser = require("../models/ragisterUser");
 const cloudinary = require("cloudinary").v2;
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken")
+const jwtSecreateKey = process.env.JWT_SECREATE_KEY
 
 const userControllers = {
   loginUser: async (req, res) => {
@@ -16,11 +18,8 @@ const userControllers = {
         });
         return;
       }
-
       // Compare the provided password with the stored password hash
       const comparePassword = await bcrypt.compare(body.password, loginUserData.password);
-      console.log(comparePassword, "====comparePassword");
-
       if (!comparePassword) {
         res.status(401).json({
           success: false,
@@ -28,12 +27,20 @@ const userControllers = {
         });
         return;
       }
-
+      let data = {
+        userId: loginUserData.id,
+        email: loginUserData.email,
+        role: loginUserData.role
+      }
+      // get Token
+      const token = jwt.sign(data, jwtSecreateKey, {
+        expiresIn: '1h',
+      });
       // If email and password are correct, send a success response
       res.status(200).json({
         success: true,
         message: "Login successful",
-        data: loginUserData,
+        data: { loginUserData, token },
       });
 
     } catch (error) {
@@ -58,7 +65,6 @@ const userControllers = {
         });
         return;
       }
-
       // Create a new user instance
       const newUser = new ragisterUser(body);
       // Hash the user's password
@@ -71,7 +77,6 @@ const userControllers = {
         });
         newUser.logo = result.url;
       }
-
       // Save the new user
       await newUser.save();
 
@@ -119,7 +124,6 @@ const userControllers = {
               console.error("Error deleting image from Cloudinary:", error);
               return res.status(500).send("Error deleting image");
             }
-            console.log(result, "======result");
           });
         }
 
@@ -151,7 +155,6 @@ const userControllers = {
     const salt = 5;
 
     body.password = await bcrypt.hash(body.password, salt);
-    console.log(id, "========id");
     let updatedData;
     try {
       if (req?.file) {
@@ -160,8 +163,6 @@ const userControllers = {
         });
         body.logo = imagePath.url;
         updatedData = await ragisterUser.findByIdAndUpdate(id, body);
-        console.log(updatedData, "========updatedData path");
-
         return res.status(200).json({
           sucess: true,
           message: "User updated",
@@ -169,8 +170,6 @@ const userControllers = {
         });
       } else {
         updatedData = await ragisterUser.findByIdAndUpdate(id, body);
-        console.log(updatedData, "========updatedData");
-
         return res.status(200).json({
           sucess: true,
           message: "User updated",

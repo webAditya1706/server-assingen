@@ -43,10 +43,8 @@ const productController = {
 							console.error("Error deleting image from Cloudinary:", error);
 							return res.status(500).send("Error deleting image");
 						}
-						console.log(result, "======result");
 					});
 				}
-
 				const deleteData = await productSchema.findByIdAndDelete(id);
 				if (deleteData)
 					res.status(200).json({
@@ -75,16 +73,12 @@ const productController = {
 
 		let updatedData;
 		try {
-			console.log(req?.file,"=====req?.file");
 			if (req?.file) {
 				const imagePath = await cloudinary.uploader.upload(req?.file?.path, {
 					folder: "crud-with-men_2",
 				});
-				console.log(imagePath.url,"=====imagePath.url");
 				body.image = imagePath.url;
 				updatedData = await productSchema.findByIdAndUpdate(id, body);
-				console.log(updatedData, "========updatedData path");
-
 				return res.status(200).json({
 					sucess: true,
 					message: "Product updated",
