@@ -1,79 +1,92 @@
 const ragisterUser = require("../models/ragisterUser");
-const cloudnary = require("cloudinary").v2;
+const cloudinary = require("cloudinary").v2;
 const bcrypt = require("bcrypt");
 
 const userControllers = {
   loginUser: async (req, res) => {
-	const {body} = req
+    const { body } = req
     try {
-		// Check if the email exists in the database
-		const loginUserData = await ragisterUser.findOne({ email: body.email });
-		
-		if (!loginUserData) {
-		  res.status(404).json({
-			success: false,
-			message: "User not registered",
-		  });
-		  return;
-		}
-	
-		// Compare the provided password with the stored password hash
-		const comparePassword = await bcrypt.compare(body.password, loginUserData.password);
-		console.log(comparePassword, "====comparePassword");
-	
-		if (!comparePassword) {
-		  res.status(401).json({
-			success: false,
-			message: "Email or password is incorrect",
-		  });
-		  return;
-		}
-	
-		// If email and password are correct, send a success response
-		res.status(200).json({
-		  success: true,
-		  message: "Login successful",
-		  data: loginUserData,
-		});
-	
-	  } catch (error) {
-		// Handle any errors that occurred during the process
-		res.status(500).json({
-		  success: false,
-		  message: "An error occurred",
-		  data: error.message,
-		});
-	  }
+      // Check if the email exists in the database
+      const loginUserData = await ragisterUser.findOne({ email: body.email });
+
+      if (!loginUserData) {
+        res.status(404).json({
+          success: false,
+          message: "User not registered",
+        });
+        return;
+      }
+
+      // Compare the provided password with the stored password hash
+      const comparePassword = await bcrypt.compare(body.password, loginUserData.password);
+      console.log(comparePassword, "====comparePassword");
+
+      if (!comparePassword) {
+        res.status(401).json({
+          success: false,
+          message: "Email or password is incorrect",
+        });
+        return;
+      }
+
+      // If email and password are correct, send a success response
+      res.status(200).json({
+        success: true,
+        message: "Login successful",
+        data: loginUserData,
+      });
+
+    } catch (error) {
+      // Handle any errors that occurred during the process
+      res.status(500).json({
+        success: false,
+        message: "An error occurred",
+        data: error.message,
+      });
+    }
   },
   ragisterUser: async (req, res) => {
     const saltround = 5;
-    const newUser = new ragisterUser(req.body);
-    newUser.password = await bcrypt.hash(newUser.password, saltround);
+    const { body } = req;
     try {
+      // Check if the email is already registered
+      const availableUser = await ragisterUser.findOne({ email: body.email });
+      if (availableUser) {
+        res.status(404).json({
+          success: false,
+          message: "This user is already registered",
+        });
+        return;
+      }
+
+      // Create a new user instance
+      const newUser = new ragisterUser(body);
+      // Hash the user's password
+      newUser.password = await bcrypt.hash(newUser.password, saltround);
+
       if (req.file) {
-        const result = await cloudnary.uploader.upload(req.file.path, {
+        // Upload user logo to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, {
           folder: "crud-with-men_2",
         });
         newUser.logo = result.url;
-        newUser.save();
-        res.status(200).json({
-          sucess: true,
-          message: "User Ragistered",
-          data: newUser,
-        });
-      } else {
-        newUser.save();
-        res.status(200).json({
-          sucess: true,
-          message: "User Ragistered",
-          data: newUser,
-        });
       }
+
+      // Save the new user
+      await newUser.save();
+
+      // Send a success response
+      res.status(200).json({
+        success: true,
+        message: "User registered",
+        data: newUser,
+      });
     } catch (error) {
+      // Handle errors
       res.status(500).json({
-        sucess: false,
-        message: "User not Ragistered",
-        data: error,
+        success: false,
+        message: "Something went wrong",
+        data: error.message,
       });
     }
   },
@@ -101,7 +114,7 @@ const userControllers = {
     try {
       if (userData) {
         if (userData.logo) {
-          cloudnary.uploader.destroy(userData.logo, (error, result) => {
+          cloudinary.uploader.destroy(userData.logo, (error, result) => {
             if (error) {
               console.error("Error deleting image from Cloudinary:", error);
               return res.status(500).send("Error deleting image");
@@ -142,7 +155,7 @@ const userControllers = {
     let updatedData;
     try {
       if (req?.file) {
-        const imagePath = await cloudnary.uploader.upload(req?.file?.path, {
+        const imagePath = await cloudinary.uploader.upload(req?.file?.path, {
           folder: "crud-with-men_2",
         });
         body.logo = imagePath.url;
