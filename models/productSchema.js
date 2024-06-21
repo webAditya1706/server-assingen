@@ -17,7 +17,11 @@ const newProduct = new Schema({
 	},
 	image: {
 		type: String,
-		// required:true
+		required:true
+	},
+	createdBy:{
+		type: String,
+		required:true
 	}
 })
 newProduct.set("timestamps", true);

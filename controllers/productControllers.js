@@ -5,8 +5,10 @@ const cloudinary = require('cloudinary').v2;
 const productController = {
 	createProduct: async (req, res) => {
 		const { body } = req;
+		console.log(req.user, "===============req.user");
 		try {
 			const newProduct = new productSchema(body);
+			newProduct.createdBy = req.user.userId;
 			if (req.file) {
 				const result = await cloudinary.uploader.upload(req.file.path, {
 					folder: "crud-with-men_2",
@@ -18,6 +20,8 @@ const productController = {
 					message: "Product created successfully",
 					data: newProduct,
 				});
+			} else {
+				res.status(400).json({ error: "File not found" });
 			}
 		} catch (error) {
 			console.error("Error creating product:", error);
@@ -25,12 +29,23 @@ const productController = {
 		}
 	},
 	getAllProduct: async (req, res) => {
-		const products = await productSchema.find();
-		res.status(200).json({
-			sucess: true,
-			message: "get all products",
-			data: products
-		})
+		if (req.user.role == "admin") {
+			console.log("admin");
+			const products = await productSchema.find({ createdBy: req.user.userId });
+			res.status(200).json({
+				sucess: true,
+				message: "get all products",
+				data: products
+			})
+			return;
+		} else {
+			const products = await productSchema.find();
+			res.status(200).json({
+				sucess: true,
+				message: "get all products",
+				data: products
+			})
+		}
 	},
 	productDelete: async (req, res) => {
 		const { id } = req.params;

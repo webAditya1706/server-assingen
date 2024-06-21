@@ -13,8 +13,8 @@ route.post(
   userController.ragisterUser
 );
 route.post("/login", userController.loginUser);
-route.get("/getAllData",userAuthentication, userController.getAllRagisterUser);
-route.delete("/deleteUser/:id",userAuthentication, userController.ragisterUserDelete);
+route.get("/getAllData", userAuthentication, userController.getAllRagisterUser);
+route.delete("/deleteUser/:id", userAuthentication, userController.ragisterUserDelete);
 route.patch(
   "/updateUser/:id",
   userAuthentication,
