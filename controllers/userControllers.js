@@ -113,6 +113,24 @@ const userControllers = {
       });
     }
   },
+  getUserById:async (req, res) => {
+    const { id } = req.params;
+    try {
+      const userData = ragisterUser.findById(id);
+      if (userData)
+        res.status(200).json({
+          sucess: true,
+          message: "User data found",
+          data: userData,
+        });
+    } catch (error) {
+      res.status(500).json({
+        sucess: false,
+        message: "User data not found",
+        data: error,
+      });
+    }
+  },
   ragisterUserDelete: async (req, res) => {
     const { id } = req.params;
     const userData = ragisterUser.findById(id);
