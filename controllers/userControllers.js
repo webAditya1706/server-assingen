@@ -116,7 +116,7 @@ const userControllers = {
   getUserById:async (req, res) => {
     const { id } = req.params;
     try {
-      const userData = ragisterUser.findById(id);
+      const userData = await ragisterUser.findById(id);
       if (userData)
         res.status(200).json({
           sucess: true,
