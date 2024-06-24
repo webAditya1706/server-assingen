@@ -171,7 +171,8 @@ const userControllers = {
     const { id } = req.params;
     const { body } = req;
     const salt = 5;
-
+console.log(req.user,"=======user");
+console.log(req.body,"=======body");
     body.password = await bcrypt.hash(body.password, salt);
     let updatedData;
     try {

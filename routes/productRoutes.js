@@ -6,7 +6,7 @@ const userAuthentication = require("../middleware/authToken")
 
 // Routes
 route.get("/getAllProducts", userAuthentication, productController.getAllProduct);
-route.post("/createProduct", userAuthentication, uploadLogo.single("image"), productController.createProduct);
+route.post("/createProduct", userAuthentication,uploadLogo.single("image"), productController.createProduct);
 route.delete("/deleteProduct/:id", userAuthentication, productController.productDelete);
 route.patch(
   "/updateProduct/:id",

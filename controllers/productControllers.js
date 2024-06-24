@@ -5,7 +5,6 @@ const cloudinary = require('cloudinary').v2;
 const productController = {
 	createProduct: async (req, res) => {
 		const { body } = req;
-		console.log(req.user, "===============req.user");
 		try {
 			const newProduct = new productSchema(body);
 			newProduct.createdBy = req.user.userId;

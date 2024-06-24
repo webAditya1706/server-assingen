@@ -14,14 +14,8 @@ route.post(
 );
 route.post("/login", userController.loginUser);
 route.get("/getAllUser", userAuthentication, userController.getAllRagisterUser);
-route.get("/getUserById/:id", userAuthentication, userController.getUserById);
+route.get("/getUserById", userAuthentication, userController.getUserById);
 route.delete("/deleteUser/:id", userAuthentication, userController.ragisterUserDelete);
-route.patch(
-  "/updateUser/:id",
-  userAuthentication,
-  uploadLogo.single("logo"),
-  ragisterUserValidation,
-  userController.ragisterUpdateUser
-);
+route.patch("/updateUser", userAuthentication, uploadLogo.single("logo"), userController.ragisterUpdateUser);
 
 module.exports = route;
