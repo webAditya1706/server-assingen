@@ -29,7 +29,6 @@ const productController = {
 	},
 	getAllProduct: async (req, res) => {
 		if (req.user.role == "admin") {
-			console.log("admin");
 			const products = await productSchema.find({ createdBy: req.user.userId });
 			res.status(200).json({
 				sucess: true,
@@ -81,29 +80,74 @@ const productController = {
 			});
 		}
 	},
+	getProductById: async (req, res) => {
+		try {
+			const { id } = req.params;
+			const productData = await productSchema.findById(id).lean();
+			if (productData) {
+				delete productData._id
+				delete productData.createdAt
+				delete productData.updatedAt
+				delete productData.createdBy
+				delete productData.__v
+
+				res.status(200).json({
+					sucess: true,
+					message: "get all products",
+					data: productData
+				})
+			}
+		} catch (error) {
+			res.status(500).json({
+				sucess: false,
+				message: "Id not found",
+				data: error,
+			});
+		}
+	},
+	getProductDetail: async (req, res) => {
+		try {
+			const { id } = req.params;
+			const productData = await productSchema.findById(id).lean();
+			if (productData) {
+				res.status(200).json({
+					sucess: true,
+					message: "get all products",
+					data: productData
+				})
+			}
+		} catch (error) {
+			res.status(500).json({
+				sucess: false,
+				message: "Id not found",
+				data: error,
+			});
+		}
+	},
+
 	productUpdate: async (req, res) => {
 		const { id } = req.params;
 		const { body } = req;
-
 		let updatedData;
 		try {
 			if (req?.file) {
-				const imagePath = await cloudinary.uploader.upload(req?.file?.path, {
+				const result = await cloudinary.uploader.upload(req.file.path, {
 					folder: "crud-with-men_2",
 				});
-				body.image = imagePath.url;
+				body.image = result.url;
 				updatedData = await productSchema.findByIdAndUpdate(id, body);
-				return res.status(200).json({
+				res.status(200).json({
 					sucess: true,
 					message: "Product updated",
-					data: body,
+					data: updatedData,
 				});
+				return;
 			} else {
 				updatedData = await productSchema.findByIdAndUpdate(id, body);
 				return res.status(200).json({
 					sucess: true,
 					message: "Product updated",
-					data: body,
+					data: updatedData,
 				});
 			}
 		} catch (error) {

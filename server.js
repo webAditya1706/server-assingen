@@ -1,7 +1,8 @@
 const express = require("express");
 require("dotenv").config();
 const userRoute = require("./routes/userRoutes")
-const productRoute = require("./routes/productRoutes")
+const productRoute = require("./routes/productRoutes");
+const cartRoute = require("./routes/cartRoutes");
 const connectDb = require("./connection/dbconnection")
 const app = express();
 // const bodyParser = require('body-parser');
@@ -24,5 +25,6 @@ app.use(express.urlencoded({extended:true}))
 
 app.use("/user",userRoute)
 app.use("/product",productRoute)
+app.use("/cart",cartRoute)
 
 app.listen(5000,() =>console.log("5000 port is wiorking"))

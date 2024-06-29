@@ -34,7 +34,7 @@ const userControllers = {
       }
       // get Token
       const token = jwt.sign(data, jwtSecreateKey, {
-        expiresIn: '1h',
+        expiresIn: '12h',
       });
       // If email and password are correct, send a success response
       res.status(200).json({
@@ -113,16 +113,22 @@ const userControllers = {
       });
     }
   },
-  getUserById:async (req, res) => {
-    const { id } = req.params;
+  getUserById: async (req, res) => {
+    const { userId } = req.user;
     try {
-      const userData = await ragisterUser.findById(id);
+      const userData = await ragisterUser.findById(userId).lean();
       if (userData)
-        res.status(200).json({
-          sucess: true,
-          message: "User data found",
-          data: userData,
-        });
+        delete userData._id
+        delete userData.password
+        delete userData.role
+        delete userData.createdAt
+        delete userData.updatedAt
+
+      res.status(200).json({
+        sucess: true,
+        message: "User data found",
+        data: userData,
+      });
     } catch (error) {
       res.status(500).json({
         sucess: false,
@@ -168,12 +174,8 @@ const userControllers = {
     }
   },
   ragisterUpdateUser: async (req, res) => {
-    const { id } = req.params;
+    const { userId } = req.user;
     const { body } = req;
-    const salt = 5;
-console.log(req.user,"=======user");
-console.log(req.body,"=======body");
-    body.password = await bcrypt.hash(body.password, salt);
     let updatedData;
     try {
       if (req?.file) {
@@ -181,14 +183,14 @@ console.log(req.body,"=======body");
           folder: "crud-with-men_2",
         });
         body.logo = imagePath.url;
-        updatedData = await ragisterUser.findByIdAndUpdate(id, body);
+        updatedData = await ragisterUser.findByIdAndUpdate(userId, body);
         return res.status(200).json({
           sucess: true,
           message: "User updated",
           data: body,
         });
       } else {
-        updatedData = await ragisterUser.findByIdAndUpdate(id, body);
+        updatedData = await ragisterUser.findByIdAndUpdate(userId, body);
         return res.status(200).json({
           sucess: true,
           message: "User updated",
