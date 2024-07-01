@@ -176,25 +176,26 @@ const userControllers = {
   ragisterUpdateUser: async (req, res) => {
     const { userId } = req.user;
     const { body } = req;
-    let updatedData;
+    let loginUserData;
     try {
       if (req?.file) {
         const imagePath = await cloudinary.uploader.upload(req?.file?.path, {
           folder: "crud-with-men_2",
         });
         body.logo = imagePath.url;
-        updatedData = await ragisterUser.findByIdAndUpdate(userId, body);
+        loginUserData = await ragisterUser.findByIdAndUpdate(userId, body);
+        loginUserData.logo = imagePath.url;
         return res.status(200).json({
           sucess: true,
           message: "User updated",
-          data: body,
+          data: loginUserData,
         });
       } else {
-        updatedData = await ragisterUser.findByIdAndUpdate(userId, body);
+        loginUserData = await ragisterUser.findByIdAndUpdate(userId, body);
         return res.status(200).json({
           sucess: true,
           message: "User updated",
-          data: body,
+          data: loginUserData,
         });
       }
     } catch (error) {
