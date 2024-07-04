@@ -49,8 +49,6 @@ const cartController = {
     },
     // removefromCart
     removeFromCartController: async (req, res) => {
-       
-        console.log(req.params,"==========param");
         const {id} = req.params
         try {
             const ramoveCart = await cartSchema.findByIdAndDelete(id)
@@ -72,7 +70,6 @@ const cartController = {
     },
     productPlaceorder: async (req, res) => {
 		user = req.user;
-		console.log(user,"===============");
 		try {
 			if(user){
                 await cartSchema.deleteMany({userId:user.userId})                
